@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Divider</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3B82F6',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    .code-block {
+      background-color: #f3f4f6;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="bg-white p-8 rounded-lg shadow-md max-w-lg w-full">
+    <h1 class="text-2xl font-bold mb-4 text-primary">Text Divider</h1>
+    <div class="mb-4">
+      <label for="text" class="block font-medium mb-2">Enter Text:</label>
+      <textarea id="text" class="w-full border border-gray-300 rounded-md p-2" rows="4" placeholder="Enter your text here..."></textarea>
+    </div>
+    <div class="mb-4">
+      <label for="divider" class="block font-medium mb-2">Number of Parts:</label>
+      <input type="number" id="divider" class="w-full border border-gray-300 rounded-md p-2" placeholder="e.g., 2, 3, 4, etc." min="1">
+    </div>
+    <button id="divide" class="bg-primary text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors duration-300">Divide</button>
+    <button id="copy" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors duration-300 ml-2" disabled>Copy</button>
+    <div id="result" class="mt-4"></div>
+  </div>
+
+  <script>
+    const textInput = document.getElementById('text');
+    const dividerInput = document.getElementById('divider');
+    const divideButton = document.getElementById('divide');
+    const copyButton = document.getElementById('copy');
+    const resultDiv = document.getElementById('result');
+
+    divideButton.addEventListener('click', () => {
+      const text = textInput.value.trim();
+      const dividerCount = parseInt(dividerInput.value, 10);
+
+      if (!text) {
+        resultDiv.innerHTML = '<p class="text-red-500">Please enter some text.</p>';
+        copyButton.disabled = true;
+        return;
+      }
+
+      if (isNaN(dividerCount) || dividerCount < 1) {
+        resultDiv.innerHTML = '<p class="text-red-500">Please enter a valid number greater than 0.</p>';
+        copyButton.disabled = true;
+        return;
+      }
+
+      const parts = [];
+      const chunkSize = Math.ceil(text.length / dividerCount);
+
+      for (let i = 0, partNumber = 1; i < text.length; i += chunkSize, partNumber++) {
+        parts.push(`<div class="code-block"><h3 class="text-lg font-bold mb-2">Part ${partNumber}</h3><p>${text.slice(i, i + chunkSize)}</p></div>`);
+      }
+
+      resultDiv.innerHTML = parts.join('');
+      copyButton.disabled = false;
+    });
+
+    copyButton.addEventListener('click', () => {
+      const codeBlocks = resultDiv.querySelectorAll('.code-block');
+      const text = Array.from(codeBlocks).map(block => block.textContent.trim()).join('\n\n');
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          copyButton.classList.add('bg-green-700');
+          setTimeout(() => {
+            copyButton.classList.remove('bg-green-700');
+          }, 2000);
+        })
+        .catch((err) => {
+          console.error('Failed to copy text: ', err);
+        });
+    });
+  </script>
+</body>
+</html>
